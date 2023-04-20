@@ -20,6 +20,7 @@ w_finish=float(gettext.getfirst("w_max", "4.0"))
 q_start=float(gettext.getfirst("q2_min", "0.5"))
 q_finish=float(gettext.getfirst("q2_max", "0.5"))
 energy=float(gettext.getfirst("energy", "5.75"))
+interpolation_step=float(gettext.getfirst("step", "0.01"))
 
 # particle_class="Pin"
 # w_start=float("1.3")
@@ -75,12 +76,14 @@ if w_start==w_finish:
     x_axis_name='Q2 (GeV2)'
     method=1
     w_steps=[float(w_start)]
-    q_steps=np.linspace(float(q_start), float(q_finish), 200)
+    # q_steps=np.linspace(float(q_start), float(q_finish), 200)
+    q_steps= np.arange(float(q_start), float(q_finish)+interpolation_step, interpolation_step).tolist()
 else:
     x_axis_name='W (GeV)'
     method=2
     q_steps=[float(q_start)]
-    w_steps=np.linspace(float(w_start), float(w_finish), 200)
+    # w_steps=np.linspace(float(w_start), float(w_finish), 200)
+    w_steps = np.arange(float(w_start), float(w_finish)+interpolation_step, interpolation_step).tolist()
 
 cos_steps=np.linspace(-1,1,200)
 w_values, q_values, cos_values = np.meshgrid(w_steps, q_steps, cos_steps, indexing='ij')
@@ -208,16 +211,16 @@ values = {'quantity':'sigma',
           'RLT-src':'',
           'channel':set_channel,
           'q2-first':q_start,
-          'q2-step':0.01,
+          'q2-step':interpolation_step,
           'q2-last':q_finish,
           'abscissa':abscissa,
           'x-first':w_start,
-          'x-step':0.01,
+          'x-step':interpolation_step,
           'x-last':w_finish,
           'ebeam':5.75,
           'L':12.8e10,
-          'DeltaW':0.01,
-          'DeltaQ2':0.01,
+          'DeltaW':interpolation_step,
+          'DeltaQ2':interpolation_step,
           'dataset':0,
           'res-view':'html',
           'linetype':'lines',
@@ -325,7 +328,7 @@ def graph_maker(x_array=[], y_array=[], d_y_array=[],
 
 def make_part_graph(x_array=[], y_array=[], d_y_array=[],
                  y_exp_data=[], dy_exp_data=[],
-                layout_title='Part of the inclusive section', x_label=x_axis_name):
+                layout_title='Part of the inclusive cross section', x_label=x_axis_name):
     
     trace_interp = go.Scatter(
         x=x_array,
@@ -499,7 +502,7 @@ fig_part = make_part_graph(x_array=result_df['x_axis_values'],
                            d_y_array=[],
                            y_exp_data=result_df['frac_sigma_vitaly'],
                            dy_exp_data=[],
-                           layout_title='Part of the inclusive section',
+                           layout_title='Part of the inclusive cross section',
                            x_label=x_axis_name)
 
 
@@ -557,6 +560,7 @@ print("""<form method="GET" action="https://clas.sinp.msu.ru/cgi-bin/almaz/integ
          <br>
          <br>
           <input  type="text" name="energy"  placeholder="ebeam (GeV)">
+          <input  type="text" name="step"  placeholder="interpolation step">
           <br>
           <br>
           
@@ -575,10 +579,10 @@ print("""
         <br><br>
         Current values:
         <br><br>
-        particle:  {}    &nbsp;&nbsp;&nbsp;&nbsp;   beam_energy: {}
+        particle:  {}    &nbsp;&nbsp;&nbsp;&nbsp;   beam_energy: {}   &nbsp;&nbsp;&nbsp;&nbsp; interpolation step : {}
         <br><br>
         w_min = {} &nbsp;&nbsp;&nbsp;   w_max={}  &nbsp;&nbsp;&nbsp;
-        q2_min={}   &nbsp;&nbsp;&nbsp;     q2_max={}""".format(particle_class,energy,w_start,w_finish,q_start,q_finish))
+        q2_min={}   &nbsp;&nbsp;&nbsp;     q2_max={}""".format(particle_class,energy,interpolation_step,w_start,w_finish,q_start,q_finish))
 
 
 print("{}".format(fig.to_html(full_html=False)))
