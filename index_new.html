@@ -1,0 +1,274 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style type="text/css">
+        A {
+            text-decoration: none;
+            color: red;
+        }
+
+        * {
+            margin: 0;
+        }
+
+        .textBox {
+            width: 1440px;
+            height: 80px;
+            margin: auto;
+        }
+
+        .imagesBox {
+            width: 1440px;
+            height: 900px;
+            margin: auto;
+        }
+
+        .textBox2 {
+            width: 1440px;
+            height: 50px;
+            margin: auto;
+        }
+
+        .tableBox1 {
+            margin: auto;
+            width: 1440px;
+            height: 350px;
+        }
+
+        .checkbox_msg {
+            color: blue;
+        }
+
+        td {
+            text-align: center;
+        }
+
+        .first_box {
+            background-color: rgba(200, 200, 200, 0.6);
+            width: 1070px;
+            height: 570px;
+            margin: auto;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+
+        .box_in_the_box {
+            background-color: rgba(100, 100, 100, 0.6);
+            position: absolute;
+            width: 300px;
+            height: 520px;
+            margin-top: 25px;
+            margin-left: 25px;
+            border-radius: 4px;
+        }
+
+        .second_box_in_the_box {
+            position: absolute;
+            border-radius: 4px;
+            margin-left: 350px;
+            margin-top: 25px;
+            width: 700px;
+            height: 520px;
+            background-color: rgba(100, 100, 100, 0.6);
+        }
+
+        .left_box {
+            position: absolute;
+            border-radius: 4px;
+            margin-left: 20px;
+            margin-top: 10px;
+            width: 330px;
+            height: 430px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.6);
+
+        }
+
+
+        .right_box {
+            position: absolute;
+            border-radius: 4px;
+            margin-left: 400px;
+            margin-top: 10px;
+            width: 280px;
+            height: 450px;
+            background-color: rgba(255, 255, 255, 0.6);
+
+        }
+
+        .input_small {
+            width: 60px;
+        }
+
+
+        .left_sub_box {
+
+            position: absolute;
+            width: 130px;
+            height: 280px;
+
+
+        }
+
+        .right_sub_box {
+            margin-top: -40px;
+            position: absolute;
+            width: 130px;
+            margin-left: 130px;
+            height: 280px;
+        }
+
+        .select_hidden {
+            visibility: hidden;
+        }
+
+
+    </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <script type="text/javascript"
+            src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+    <title>CLAS graph</title>
+</head>
+<body>
+<center>
+
+    <br>
+    <br>
+    <br>
+	<a href="https://clas.sinp.msu.ru/cgi-bin/almaz/instruction">Available data areas</a>
+	<br>
+
+    <br><br>
+
+
+    <form method="GET" action="https://clas.sinp.msu.ru/cgi-bin/almaz/jlab-interpolation/main.py">
+
+        <div class="first_box">
+            <div class="box_in_the_box">
+                <br>
+                <br>
+
+                <br>
+
+
+                <br>
+
+                <br>
+                <br>
+
+                <br>
+                <br>
+
+
+                <br>
+                <br>
+
+
+
+            </div>
+
+            <div class="second_box_in_the_box">
+
+                <br>
+                Interpolation features
+
+                <div class="left_box">
+                    <br>
+                    <p>Введите W+Q2 или W+cos(theta) или Q2+cos(theta) и получите
+                        зависимость структурных функций от третьей переменной (cos(theta)/W/Q2)</p>
+
+                    <br>
+                    (Введите дополнительно Ebeam/eps и phi и дополнительно получите зависимость сечения от третьей
+                    переменной (cos(theta)/W/Q2))
+
+                    <br>
+                    ___________________________
+                    <br>
+                    <br>
+                    Введите W+Q2+cos(theta), Ebeam/eps
+                    и получите зависимость дифф сечения от угла phi
+
+                    <br>
+                    ___________________________
+                    <br>
+                    <br>
+                    x_min и x_max позволяют вывести зависимости в необходимом диапазоне (обрезать график по оси x)
+
+                </div>
+
+                <div class="right_box">
+
+                    <br>
+
+
+                    <p>W (GeV)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <input type="text" name="w"
+                                                                                placeholder="W value"
+                                                                                ></p>
+
+                    <br>
+                    <p>Q2 (GeV2)&nbsp;&nbsp;&nbsp;&nbsp; <input type="text" name="q2" placeholder="Q2 value"
+                                                                ></p>
+
+
+                    <br>
+                    <p>cos(theta) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" name="cos"
+                                                                                   placeholder="Cos theta value"
+                                                                                   >
+                    </p>
+
+
+                    <br>
+                    <p>phi (degree) &nbsp;&nbsp;&nbsp;<input type="text" name="phi" placeholder="phi value"
+                                                             ></p>
+
+
+                    <br>
+                    Enter BeamEnergy OR eps (optional)
+                    <br>
+                    <br>
+                    <p>
+                        Energy:
+                        <input class="input_small" type="text" name="eBeam" placeholder="MeV" >
+                        &nbsp;&nbsp;&nbsp;&nbsp;eps:
+                        <input class="input_small" type="text" name="eps" placeholder="eps" >
+                    </p>
+                    <br>
+
+
+                    x_axis min and max values (optional)
+                    <br>
+                    <br>
+                    <p>x_min <input class="input_small" type="text" name="x_min" placeholder="x_min" >
+                        &nbsp;&nbsp;&nbsp;x_min
+                        <input class="input_small" type="text" name="x_max" placeholder="x_max">
+                    </p>
+                    <br>
+                    <p> interpolation step &nbsp;&nbsp;&nbsp;&nbsp;
+                        <input class="input_small" type="text" name="grid_step_user" placeholder="grid step"
+                               >
+                    </p>
+                    <br>
+                    <p> reaction channel:
+                        <select class="select" name="particle" size="1">
+                            <option value="Pin">gvp---&gt;π⁺n</option>
+                            <option value="Pi0P">gvp---&gt;π⁰p</option>
+                        </select>
+                    </p>
+                    <br>
+                    <p><input class="button" class="submitbutton" type="submit" value="Run"></p>
+
+                </div>
+            </div>
+           nasrtdinov.ag17@physics.msu.ru
+        </div>
+
+    </form>
+
+
+</center>
+</body>
+</html>

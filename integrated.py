@@ -15,12 +15,29 @@ import plotly.graph_objs as go
 gettext = cgi.FieldStorage()
 
 particle_class=gettext.getfirst("Particle", "Pin")
-w_start=float(gettext.getfirst("w_min", "0.1"))
-w_finish=float(gettext.getfirst("w_max", "4.0"))
-q_start=float(gettext.getfirst("q2_min", "0.5"))
-q_finish=float(gettext.getfirst("q2_max", "0.5"))
-energy=float(gettext.getfirst("energy", "5.75"))
+w_start=float(gettext.getfirst("w_min", "0.1").replace(",", "."))
+w_finish=float(gettext.getfirst("w_max", "4.0").replace(",", "."))
+q_start=float(gettext.getfirst("q2_min", "0.5").replace(",", "."))
+q_finish=float(gettext.getfirst("q2_max", "0.5").replace(",", "."))
+energy=float(gettext.getfirst("energy", "5.75").replace(",", "."))
 interpolation_step=float(gettext.getfirst("step", "0.01"))
+
+
+particle_form_text=''
+if particle_class == 'Pin':
+    particle_form_text="""<p> Reaction channel:
+                        <select class="select" name="Particle" size="1">
+                        <option value="Pin">gvp--->π⁺n</option>
+                        <option value="Pi0P">gvp--->π⁰p</option>
+                        </select>
+                    </p>"""
+else:
+    particle_form_text = """<p> Reaction channel:
+                            <select class="select" name="Particle" size="1">
+                            <option value="Pi0P">gvp--->π⁰p</option>
+                            <option value="Pin">gvp--->π⁺n</option>
+                            </select>
+                        </p>"""
 
 # particle_class="Pin"
 # w_start=float("1.3")
@@ -39,6 +56,9 @@ df = pd.read_csv('final_table.csv', header=None, sep='\t',
                             'sigma_l', 'd_sigma_l', 'sigma_tt', 'd_sigma_tt', 'sigma_lt', 'd_sigma_lt', 'eps'])
 df['w_average'] = (df['Wmin'] + df['Wmax']) / 2
 df['q2_average'] = (df['Q2min'] + df['Q2max']) / 2
+
+
+
 
 # read file and use data for particle
 if particle_class == 'Pin':
@@ -509,71 +529,234 @@ fig_part = make_part_graph(x_array=result_df['x_axis_values'],
 
 print("Content-type: text/html\n")
 print("""<!DOCTYPE HTML>
-                <html>
-                <head>
-        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-                <style type="text/css">
-                        A { text-decoration: none;  color: red; } 
-                        * { margin: 0;}
-            .textBox { width: 1440px; height:80px; margin:auto; }
-            .imagesBox{ width: 1440px; height:900px; margin:auto; }
-            .textBox2 { width: 1440px; height:50px; margin:auto; }
-            .tableBox1 {margin:auto;  width: 1440px; height:350px;}
-            td { text-align: center ;}
+<html>
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style type="text/css">
+        A {
+            text-decoration: none;
+            color: red;
+        }
+
+        * {
+            margin: 0;
+        }
+
+        .textBox {
+            width: 1440px;
+            height: 80px;
+            margin: auto;
+        }
+
+        .imagesBox {
+            width: 1440px;
+            height: 900px;
+            margin: auto;
+        }
+
+        .textBox2 {
+            width: 1440px;
+            height: 50px;
+            margin: auto;
+        }
+
+        .tableBox1 {
+            margin: auto;
+            width: 1440px;
+            height: 350px;
+        }
+
+        .checkbox_msg {
+            color: blue;
+        }
+
+        td {
+            text-align: center;
+        }
+
+        .first_box {
+            background-color: rgba(200, 200, 200, 0.6);
+            width: 1070px;
+            height: 570px;
+            margin: auto;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
 
 
-                        </style>
-                <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width">
-                <script type="text/javascript"
-                src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-                </script>                   
-                <title>CLAS graph</title>
-                    </head>
+        .box_in_the_box {
+            background-color: rgba(100, 100, 100, 0.6);
+            position: absolute;
+            width: 300px;
+            height: 520px;
+            margin-top: 25px;
+            margin-left: 25px;
+            border-radius: 4px;
+        }
 
-		<body>  
-        <center>""")
+        .second_box_in_the_box {
+            position: absolute;
+            border-radius: 4px;
+            margin-left: 350px;
+            margin-top: 25px;
+            width: 700px;
+            height: 520px;
+            background-color: rgba(100, 100, 100, 0.6);
+        }
 
-print("""<form method="GET" action="https://clas.sinp.msu.ru/cgi-bin/almaz/integrated/integrated.py" >
+        .left_box {
+            position: absolute;
+            border-radius: 4px;
+            margin-left: 20px;
+            margin-top: 10px;
+            width: 330px;
+            height: 430px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.6);
 
-         <br>
-         <br>
-         Для получение интегрального сечения как функции W введите различные w_min и w_max и одинаковое значение q_min=q_max
-         (пример: w_min=0.4,  w_max=4,  q_min=0.5, q_max=0.5) и энергию реакции
-         <br>
-         <br>
-         
-         Для получение интегрального сечения как функции Q2 введите различные q_min и q_max и одинаковое значение w_min=w_max
-         (пример: w_min=1.4,  w_max=1.4,  q_min=0.5, q_max=4) и энергию реакции
-         <br>
-         <br>
-         
-         <a href="https://clas.sinp.msu.ru/cgi-bin/almaz/instruction">Available data areas</a>
-         
-         
-         <br>
-         <br>
-          <input  type="text" name="w_min"  placeholder="W min (GeV)"> 
-          <input  type="text" name="w_max"  placeholder="W max (GeV)">
-          <input  type="text" name="q2_min"  placeholder="Q2 min (GeV2)">
-          <input  type="text" name="q2_max"  placeholder="Q2 max (GeV2)">
-         <br>
-         <br>
-          <input  type="text" name="energy"  placeholder="ebeam (GeV)">
-          <input  type="text" name="step"  placeholder="interpolation step">
-          <br>
-          <br>
-          
+        }
+
+
+        .right_box {
+            position: absolute;
+            border-radius: 4px;
+            margin-left: 400px;
+            margin-top: 10px;
+            width: 280px;
+            height: 450px;
+            background-color: rgba(255, 255, 255, 0.6);
+
+        }
+
+        .input_small {
+            width: 80px;
+        }
+
+
+        .left_sub_box {
+
+            position: absolute;
+            width: 130px;
+            height: 280px;
+
+
+        }
+
+        .right_sub_box {
+            margin-top: -40px;
+            position: absolute;
+            width: 130px;
+            margin-left: 130px;
+            height: 280px;
+        }
+
+        .select_hidden {
+            visibility: hidden;
+        }""")
+
+print(""""
+    </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <script type="text/javascript"
+            src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+    <title>CLAS graph</title>
+</head>
+<body>
+<center>
+
+    <br>
+    <br>
+    <br>
+	<a href="https://clas.sinp.msu.ru/cgi-bin/almaz/instruction">Available data areas</a>
+	<br>
+
+    <br><br>
+
+
+    <form method="GET" action="https://clas.sinp.msu.ru/cgi-bin/almaz/integrated/integrated.py">
+
+        <div class="first_box">
+            <div class="box_in_the_box">
+                <br><br><br><br><br><br><br><br><br><br>
+            </div>
+            
+            <div class="second_box_in_the_box">
+                <br>
+                Integrated cross section
+                <div class="left_box">
+                    <br>
+                    <br>
+                    Для получение интегрального сечения как функции W введите различные
+                    w_min и w_max и одинаковое значение q_min=q_max и энергию реакции
+                    <br>
+                    (пример: w_min=0.4,  w_max=4,  q_min=0.5, q_max=0.5, E_beam=5.75)
+                    <br>
+                    ___________________________
+                    <br><br>
+                    Для получение интегрального сечения как функции Q2 введите различные
+                    q_min и q_max и одинаковое значение w_min=w_max и энергию реакции
+                    <br>
+                    (пример: w_min=1.4,  w_max=1.4,  q_min=0.5, q_max=4, E_beam=5.75)
+                    <br>
+                    ___________________________
+                    <br><br>
+                </div>
+
+                <div class="right_box">
+                    <br><br><br><br>
+                    <p>W min (GeV):&nbsp;&nbsp;&nbsp;&nbsp; <input type="text" class="input_small"  name="w_min" value="{}"
+                                                                                placeholder="W min (GeV)"
+                                                                                ></p>
+                    <br>
+                    <p>W max (GeV):&nbsp;&nbsp;&nbsp;&nbsp; <input type="text" class="input_small"  name="w_max" value="{}"
+                                                                  placeholder="W max (GeV)"
+                                                                ></p>
+                    <br>
+                    <p>Q2 min (GeV2):&nbsp;&nbsp;&nbsp;<input type="text" class="input_small"  name="q2_min" value="{}"
+                                                                                   placeholder="Q2 min (GeV2)"
+                                                                                   >
+                    </p>
+                    <br>
+                    <p>Q2 max (GeV2):&nbsp;&nbsp;<input type="text" class="input_small" name="q2_max" value="{}"
+                                                       placeholder="Q2 max (GeV2)"
+                                                             ></p>
+
+                    <br><br><br><p>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Beam energy:
+                        <input class="input_small" type="text" name="eBeam" placeholder="MeV" value="{}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    </p>
+                    <br>
+
+                    <p> Interpolation step:
+                        <input class="input_small" type="text" name="grid_step_user" value="{}"
+                               placeholder="grid step"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    </p>
+                    <br><br><br> 
                     
-            <select class="select" name="Particle" size="1">
-                <option value="Pin">gvp--->π⁺n</option>
-                <option value="Pi0P">gvp--->π⁰p</option>
-            </select>
-          <br>
-          <br>
-         <p> <input class="button" class="submitbutton" type="submit" value="Run">  </p>
-         <br>
-        </form>""")
+                    {}
+                    
+                    <br>
+                    <p><input class="button" class="submitbutton" type="submit" value="Run"></p>
+
+                </div>
+            </div>
+           nasrtdinov.ag17@physics.msu.ru
+        </div>
+    </form>""".format(w_start,w_finish,q_start,q_finish,energy,interpolation_step,particle_form_text))
+
+
+particle_class=gettext.getfirst("Particle", "Pin")
+w_start=float(gettext.getfirst("w_min", "0.1").replace(",", "."))
+w_finish=float(gettext.getfirst("w_max", "4.0").replace(",", "."))
+q_start=float(gettext.getfirst("q2_min", "0.5").replace(",", "."))
+q_finish=float(gettext.getfirst("q2_max", "0.5").replace(",", "."))
+energy=float(gettext.getfirst("energy", "5.75").replace(",", "."))
+interpolation_step=float(gettext.getfirst("step", "0.01"))
+
+
+
 
 print("""
         <br><br>
