@@ -10,22 +10,19 @@ from bs4 import BeautifulSoup
 import requests
 import plotly.graph_objs as go
 
-
-
 gettext = cgi.FieldStorage()
 
-particle_class=gettext.getfirst("Particle", "Pin")
-w_start=float(gettext.getfirst("w_min", "0.1").replace(",", "."))
-w_finish=float(gettext.getfirst("w_max", "4.0").replace(",", "."))
-q_start=float(gettext.getfirst("q2_min", "0.5").replace(",", "."))
-q_finish=float(gettext.getfirst("q2_max", "0.5").replace(",", "."))
-energy=float(gettext.getfirst("energy", "5.75").replace(",", "."))
-interpolation_step=float(gettext.getfirst("step", "0.01"))
+particle_class = gettext.getfirst("Particle", "Pin")
+w_start = float(gettext.getfirst("w_min", "0.1").replace(",", "."))
+w_finish = float(gettext.getfirst("w_max", "4.0").replace(",", "."))
+q_start = float(gettext.getfirst("q2_min", "0.5").replace(",", "."))
+q_finish = float(gettext.getfirst("q2_max", "0.5").replace(",", "."))
+energy = float(gettext.getfirst("energy", "5.75").replace(",", "."))
+interpolation_step = float(gettext.getfirst("step", "0.01"))
 
-
-particle_form_text=''
+particle_form_text = ''
 if particle_class == 'Pin':
-    particle_form_text="""<p> Reaction channel:
+    particle_form_text = """<p> Reaction channel:
                         <select class="select" name="Particle" size="1">
                         <option value="Pin">gvp--->π⁺n</option>
                         <option value="Pi0P">gvp--->π⁰p</option>
@@ -47,18 +44,14 @@ else:
 # energy=float("5.75")
 
 
-
-x_axis_name=''
+x_axis_name = ''
 
 mp = 0.93827
 df = pd.read_csv('final_table.csv', header=None, sep='\t',
-                     names=['Channel', 'MID', 'Wmin', 'Wmax', 'Q2min', 'Q2max', 'Cos(theta)', 'sigma_t', 'd_sigma_t',
-                            'sigma_l', 'd_sigma_l', 'sigma_tt', 'd_sigma_tt', 'sigma_lt', 'd_sigma_lt', 'eps'])
+                 names=['Channel', 'MID', 'Wmin', 'Wmax', 'Q2min', 'Q2max', 'Cos(theta)', 'sigma_t', 'd_sigma_t',
+                        'sigma_l', 'd_sigma_l', 'sigma_tt', 'd_sigma_tt', 'sigma_lt', 'd_sigma_lt', 'eps'])
 df['w_average'] = (df['Wmin'] + df['Wmax']) / 2
 df['q2_average'] = (df['Q2min'] + df['Q2max']) / 2
-
-
-
 
 # read file and use data for particle
 if particle_class == 'Pin':
@@ -91,160 +84,156 @@ elif particle_class == 'Pi0P':
     ]
 
 # initialize method
-method=0
-if w_start==w_finish:
-    x_axis_name='Q2 (GeV2)'
-    method=1
-    w_steps=[float(w_start)]
+method = 0
+if w_start == w_finish:
+    x_axis_name = 'Q2 (GeV2)'
+    method = 1
+    w_steps = [float(w_start)]
     # q_steps=np.linspace(float(q_start), float(q_finish), 200)
-    q_steps= np.arange(float(q_start), float(q_finish)+interpolation_step, interpolation_step).tolist()
+    q_steps = np.arange(float(q_start), float(q_finish) + interpolation_step, interpolation_step).tolist()
 else:
-    x_axis_name='W (GeV)'
-    method=2
-    q_steps=[float(q_start)]
+    x_axis_name = 'W (GeV)'
+    method = 2
+    q_steps = [float(q_start)]
     # w_steps=np.linspace(float(w_start), float(w_finish), 200)
-    w_steps = np.arange(float(w_start), float(w_finish)+interpolation_step, interpolation_step).tolist()
+    w_steps = np.arange(float(w_start), float(w_finish) + interpolation_step, interpolation_step).tolist()
 
-cos_steps=np.linspace(-1,1,200)
+cos_steps = np.linspace(-1, 1, 200)
 w_values, q_values, cos_values = np.meshgrid(w_steps, q_steps, cos_steps, indexing='ij')
 w_values, q_values, cos_values = w_values.ravel(), q_values.ravel(), cos_values.ravel()
 
 # make interpolation and drop nans
-sigma_t=[]
-d_sigma_t=[]
-sigma_l=[]
-d_sigma_l=[]
-sigma_tt=[]
-d_sigma_tt=[]
-sigma_lt=[]
-d_sigma_lt=[]
+sigma_t = []
+d_sigma_t = []
+sigma_l = []
+d_sigma_l = []
+sigma_tt = []
+d_sigma_tt = []
+sigma_lt = []
+d_sigma_lt = []
 
-w_res_val=[]
-q_res_val=[]
-cos_res_val=[]
+w_res_val = []
+q_res_val = []
+cos_res_val = []
 
 for current_df in dataframes:
-    points=(current_df.w_average.ravel().flatten(),
-            current_df.q2_average.ravel().flatten(),
-            current_df['Cos(theta)'].ravel().flatten())
+    points = (current_df.w_average.ravel().flatten(),
+              current_df.q2_average.ravel().flatten(),
+              current_df['Cos(theta)'].ravel().flatten())
 
-    values=(current_df.sigma_t.ravel().flatten(),
-           current_df.d_sigma_t.ravel().flatten(),
-           current_df.sigma_l.ravel().flatten(),
-           current_df.d_sigma_l.ravel().flatten(),
-           current_df.sigma_tt.ravel().flatten(),
-           current_df.d_sigma_tt.ravel().flatten(),
-           current_df.sigma_lt.ravel().flatten(),
-           current_df.d_sigma_lt.ravel().flatten())
+    values = (current_df.sigma_t.ravel().flatten(),
+              current_df.d_sigma_t.ravel().flatten(),
+              current_df.sigma_l.ravel().flatten(),
+              current_df.d_sigma_l.ravel().flatten(),
+              current_df.sigma_tt.ravel().flatten(),
+              current_df.d_sigma_tt.ravel().flatten(),
+              current_df.sigma_lt.ravel().flatten(),
+              current_df.d_sigma_lt.ravel().flatten())
 
-    values=np.stack((values), axis=-1)
+    values = np.stack((values), axis=-1)
 
     current_interpolation = griddata(points, values,
                                      (w_values, q_values, cos_values),
                                      method='linear', rescale=True)
 
-    not_nans = ~np.isnan(current_interpolation[:,0])
+    not_nans = ~np.isnan(current_interpolation[:, 0])
 
-    sigma_t+=current_interpolation[:,0][not_nans].flatten().tolist()
-    d_sigma_t+=current_interpolation[:,1][not_nans].flatten().tolist()
-    sigma_l+=current_interpolation[:,2][not_nans].flatten().tolist()
-    d_sigma_l+=current_interpolation[:,3][not_nans].flatten().tolist()
-    sigma_tt+=current_interpolation[:,4][not_nans].flatten().tolist()
-    d_sigma_tt+=current_interpolation[:,5][not_nans].flatten().tolist()
-    sigma_lt+=current_interpolation[:,6][not_nans].flatten().tolist()
-    d_sigma_lt+=current_interpolation[:,7][not_nans].flatten().tolist()
+    sigma_t += current_interpolation[:, 0][not_nans].flatten().tolist()
+    d_sigma_t += current_interpolation[:, 1][not_nans].flatten().tolist()
+    sigma_l += current_interpolation[:, 2][not_nans].flatten().tolist()
+    d_sigma_l += current_interpolation[:, 3][not_nans].flatten().tolist()
+    sigma_tt += current_interpolation[:, 4][not_nans].flatten().tolist()
+    d_sigma_tt += current_interpolation[:, 5][not_nans].flatten().tolist()
+    sigma_lt += current_interpolation[:, 6][not_nans].flatten().tolist()
+    d_sigma_lt += current_interpolation[:, 7][not_nans].flatten().tolist()
 
-    w_res_val+=w_values[not_nans].flatten().tolist()
-    q_res_val+=q_values[not_nans].flatten().tolist()
-    cos_res_val+=cos_values[not_nans].flatten().tolist()
+    w_res_val += w_values[not_nans].flatten().tolist()
+    q_res_val += q_values[not_nans].flatten().tolist()
+    cos_res_val += cos_values[not_nans].flatten().tolist()
 
 # sort values and calculate eps
-tmp_df=pd.DataFrame({'w':w_res_val,
-                     'q':q_res_val,
-                     'cos':cos_res_val,
-                     'sigma_t': sigma_t,
-                     'd_sigma_t':d_sigma_t,
-                     'sigma_l': sigma_l,
-                     'd_sigma_l':d_sigma_l,
-                     'sigma_tt': sigma_tt,
-                     'd_sigma_tt':d_sigma_t,
-                     'sigma_lt': sigma_lt,
-                     'd_sigma_lt':d_sigma_lt})
+tmp_df = pd.DataFrame({'w': w_res_val,
+                       'q': q_res_val,
+                       'cos': cos_res_val,
+                       'sigma_t': sigma_t,
+                       'd_sigma_t': d_sigma_t,
+                       'sigma_l': sigma_l,
+                       'd_sigma_l': d_sigma_l,
+                       'sigma_tt': sigma_tt,
+                       'd_sigma_tt': d_sigma_t,
+                       'sigma_lt': sigma_lt,
+                       'd_sigma_lt': d_sigma_lt})
 
-tmp_df.sort_values(by=['w','q','cos'],inplace=True)
-tmp_df.reset_index(drop=True,inplace=True)
-tmp_df['nu']=(tmp_df['w'] ** 2 + tmp_df['q'] - mp * mp) / (2 * mp)
-tmp_df['eps']=1/(1 + 2*(tmp_df['nu']**2 + tmp_df['q'])/(4*(energy - tmp_df['nu'])*energy-tmp_df['q']))
-tmp_df['sigma_u']=tmp_df['sigma_t']+tmp_df['sigma_l']*tmp_df['eps']
-tmp_df['sigma']=tmp_df['sigma_u']*2*np.pi
+tmp_df.sort_values(by=['w', 'q', 'cos'], inplace=True)
+tmp_df.reset_index(drop=True, inplace=True)
+tmp_df['nu'] = (tmp_df['w'] ** 2 + tmp_df['q'] - mp * mp) / (2 * mp)
+tmp_df['eps'] = 1 / (1 + 2 * (tmp_df['nu'] ** 2 + tmp_df['q']) / (4 * (energy - tmp_df['nu']) * energy - tmp_df['q']))
+tmp_df['sigma_u'] = tmp_df['sigma_t'] + tmp_df['sigma_l'] * tmp_df['eps']
+tmp_df['sigma'] = tmp_df['sigma_u'] * 2 * np.pi
 
 # calculate integral cross section
-w_graph=[]
-q_graph=[]
-sigma_integrated=[]
-d_sigma_integrated=[]
+w_graph = []
+q_graph = []
+sigma_integrated = []
+d_sigma_integrated = []
 
-if method==2:
-    abscissa='x'
+if method == 2:
+    abscissa = 'x'
 
     for el in tmp_df['w'].unique():
-        t=tmp_df[tmp_df['w']==el].copy()
+        t = tmp_df[tmp_df['w'] == el].copy()
         t.reset_index(inplace=True, drop=True)
-        integral_sigma=0
-        d_integral_sigma=0
-        for cos_idx in range(0,len(t)-1):
-            integral_sigma += (t.loc[cos_idx+1, 'cos'] - t.loc[cos_idx, 'cos']) * \
-                                ((t.loc[cos_idx+1, 'sigma'] + t.loc[cos_idx, 'sigma'])/2)
-            d_integral_sigma += (t.loc[cos_idx+1, 'sigma']**2 + t.loc[cos_idx, 'sigma']**2) * \
-                                 ((t.loc[cos_idx+1, 'cos'] - t.loc[cos_idx, 'cos'])/2)**2
+        integral_sigma = 0
+        d_integral_sigma = 0
+        for cos_idx in range(0, len(t) - 1):
+            integral_sigma += (t.loc[cos_idx + 1, 'cos'] - t.loc[cos_idx, 'cos']) * \
+                              ((t.loc[cos_idx + 1, 'sigma'] + t.loc[cos_idx, 'sigma']) / 2)
+            d_integral_sigma += (t.loc[cos_idx + 1, 'sigma'] ** 2 + t.loc[cos_idx, 'sigma'] ** 2) * \
+                                ((t.loc[cos_idx + 1, 'cos'] - t.loc[cos_idx, 'cos']) / 2) ** 2
         w_graph.append(el)
         q_graph.append(q_start)
         sigma_integrated.append(integral_sigma)
-        d_sigma_integrated.append(d_integral_sigma**0.5)
-        
+        d_sigma_integrated.append(d_integral_sigma ** 0.5)
 
-if method==1:
-    abscissa='Q2'
+if method == 1:
+    abscissa = 'Q2'
     for el in tmp_df['q'].unique():
-        t=tmp_df[tmp_df['q']==el].copy()
+        t = tmp_df[tmp_df['q'] == el].copy()
         t.reset_index(inplace=True, drop=True)
-        integral_sigma=0
-        d_integral_sigma=0
-        for cos_idx in range(0,len(t)-1):
-            integral_sigma += (t.loc[cos_idx+1, 'cos'] - t.loc[cos_idx, 'cos']) * \
-                                ((t.loc[cos_idx+1, 'sigma'] + t.loc[cos_idx, 'sigma'])/2)
-            d_integral_sigma += (t.loc[cos_idx+1, 'sigma']**2 + t.loc[cos_idx, 'sigma']**2) * \
-                                 ((t.loc[cos_idx+1, 'cos'] - t.loc[cos_idx, 'cos'])/2)**2
+        integral_sigma = 0
+        d_integral_sigma = 0
+        for cos_idx in range(0, len(t) - 1):
+            integral_sigma += (t.loc[cos_idx + 1, 'cos'] - t.loc[cos_idx, 'cos']) * \
+                              ((t.loc[cos_idx + 1, 'sigma'] + t.loc[cos_idx, 'sigma']) / 2)
+            d_integral_sigma += (t.loc[cos_idx + 1, 'sigma'] ** 2 + t.loc[cos_idx, 'sigma'] ** 2) * \
+                                ((t.loc[cos_idx + 1, 'cos'] - t.loc[cos_idx, 'cos']) / 2) ** 2
         w_graph.append(w_start)
         q_graph.append(el)
         sigma_integrated.append(integral_sigma)
-        d_sigma_integrated.append(d_integral_sigma**0.5)
+        d_sigma_integrated.append(d_integral_sigma ** 0.5)
 
+set_channel = [255, 1] if particle_class == 'Pin' else [255, 2]
+set_channel_name = 'π+n' if particle_class == 'Pin' else 'π0p'
 
-set_channel =  [255,1] if particle_class=='Pin' else [255,2]
-set_channel_name = 'π+n' if particle_class=='Pin' else 'π0p'
-
-
-
-url='https://clas.sinp.msu.ru/strfun/'
-values = {'quantity':'sigma',
-          'RLT-src':'',
-          'channel':set_channel,
-          'q2-first':q_start,
-          'q2-step':interpolation_step,
-          'q2-last':q_finish,
-          'abscissa':abscissa,
-          'x-first':w_start,
-          'x-step':interpolation_step,
-          'x-last':w_finish,
-          'ebeam':5.75,
-          'L':12.8e10,
-          'DeltaW':interpolation_step,
-          'DeltaQ2':interpolation_step,
-          'dataset':0,
-          'res-view':'html',
-          'linetype':'lines',
-          'submit':'Calculate'}
+url = 'https://clas.sinp.msu.ru/strfun/'
+values = {'quantity': 'sigma',
+          'RLT-src': '',
+          'channel': set_channel,
+          'q2-first': q_start,
+          'q2-step': interpolation_step,
+          'q2-last': q_finish,
+          'abscissa': abscissa,
+          'x-first': w_start,
+          'x-step': interpolation_step,
+          'x-last': w_finish,
+          'ebeam': 5.75,
+          'L': 12.8e10,
+          'DeltaW': interpolation_step,
+          'DeltaQ2': interpolation_step,
+          'dataset': 0,
+          'res-view': 'html',
+          'linetype': 'lines',
+          'submit': 'Calculate'}
 
 response = requests.get(url, params=values)
 if response.ok:
@@ -253,26 +242,25 @@ if response.ok:
     df_vitaly = pd.read_html(str(table))[0]
 else:
     pass
+
+
 #     print(f'Request failed with status code {response.status_code}')
 
 
-
-
 def graph_maker(x_array=[], y_array=[], d_y_array=[],
-                         x_exp_data=[], y_exp_data=[], dy_exp_data=[],
-                         x_exp_data_inclusive=[], y_exp_data_inclusive=[], dy_exp_data_inclusive=[],
-                         layout_title='Integral cross section (mcbn)', x_label=x_axis_name):
-
+                x_exp_data=[], y_exp_data=[], dy_exp_data=[],
+                x_exp_data_inclusive=[], y_exp_data_inclusive=[], dy_exp_data_inclusive=[],
+                layout_title='Integrated Cross section (mcbn)', x_label=x_axis_name):
     trace_interp = go.Scatter(
         x=x_array,
         y=y_array,
         error_y=dict(
             type='data',
             array=d_y_array,
-#             color='rgba(100, 100, 255, 0.6)',
+            #             color='rgba(100, 100, 255, 0.6)',
             thickness=1.5,
             width=3),
-        name='interpolation Almaz ' + str('π+n' if particle_class=='Pin' else 'π0p'),
+        name='interpolation Almaz ' + str('π+n' if particle_class == 'Pin' else 'π0p'),
         marker_size=1)
 
     trace_interp_vitaly = go.Scatter(
@@ -281,15 +269,14 @@ def graph_maker(x_array=[], y_array=[], d_y_array=[],
         error_y=dict(
             type='data',
             array=dy_exp_data,
-#             color='rgba(100, 20, 255, 0.6)',
+            #             color='rgba(100, 20, 255, 0.6)',
             thickness=1.5,
             width=3),
-        name='interpolation Vitaly ' + str('π+n' if particle_class=='Pin' else 'π0p'),
+        name='interpolation Vitaly ' + str('π+n' if particle_class == 'Pin' else 'π0p'),
         marker_size=1)
 
-
     trace_interp_inclusive = go.Scatter(
-#         mode='markers',
+        #         mode='markers',
         x=x_exp_data_inclusive,
         y=y_exp_data_inclusive,
         name='interpolation Vitaly inclusive',
@@ -298,7 +285,7 @@ def graph_maker(x_array=[], y_array=[], d_y_array=[],
         error_y=dict(
             type='data',
             array=dy_exp_data_inclusive,
-#             color='rgba(100, 100, 100, 1)',
+            #             color='rgba(100, 100, 100, 1)',
             thickness=1.5,
             width=3),
         marker_size=10)
@@ -344,22 +331,19 @@ def graph_maker(x_array=[], y_array=[], d_y_array=[],
     return fig
 
 
-
-
 def make_part_graph(x_array=[], y_array=[], d_y_array=[],
-                 y_exp_data=[], dy_exp_data=[],
-                layout_title='Part of the inclusive cross section', x_label=x_axis_name):
-    
+                    y_exp_data=[], dy_exp_data=[],
+                    layout_title='Part of the Inclusive Cross section', x_label=x_axis_name):
     trace_interp = go.Scatter(
         x=x_array,
         y=y_array,
         error_y=dict(
             type='data',
             array=d_y_array,
-#             color='rgba(100, 100, 255, 0.6)',
+            color='rgba(0,0 255, 0.2)',
             thickness=1.5,
             width=3),
-        name='interpolation Almaz ' + str('π+n' if particle_class=='Pin' else 'π0p'),
+        name='interpolation Almaz ' + str('π+n' if particle_class == 'Pin' else 'π0p'),
         marker_size=1)
 
     trace_interp_vitaly = go.Scatter(
@@ -368,10 +352,10 @@ def make_part_graph(x_array=[], y_array=[], d_y_array=[],
         error_y=dict(
             type='data',
             array=dy_exp_data,
-#             color='rgba(100, 20, 255, 0.6)',
+            color='rgba(255,0 0, 0.2)',
             thickness=1.5,
             width=3),
-        name='interpolation Vitaly ' + str('π+n' if particle_class=='Pin' else 'π0p'),
+        name='interpolation Vitaly ' + str('π+n' if particle_class == 'Pin' else 'π0p'),
         marker_size=1)
 
     data = [trace_interp, trace_interp_vitaly]
@@ -415,115 +399,140 @@ def make_part_graph(x_array=[], y_array=[], d_y_array=[],
     return fig
 
 
+if method == 1:
+    fig = graph_maker(x_array=q_graph,
+                      y_array=sigma_integrated,
+                      d_y_array=d_sigma_integrated,
+                      x_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['Q2, GeV2'],
+                      y_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['σ, μb'],
+                      dy_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['Δσ, μb'],
 
-if method==1:
-    fig=graph_maker(x_array=q_graph,
-                             y_array=sigma_integrated,
-                             d_y_array=d_sigma_integrated,
-                         x_exp_data=df_vitaly[df_vitaly['Channel']==set_channel_name]['Q2, GeV2'],
-                         y_exp_data=df_vitaly[df_vitaly['Channel']==set_channel_name]['σ, μb'],
-                         dy_exp_data=df_vitaly[df_vitaly['Channel']==set_channel_name]['Δσ, μb'],
+                      x_exp_data_inclusive=df_vitaly[df_vitaly['Channel'] == 'inclusive']['Q2, GeV2'],
+                      y_exp_data_inclusive=df_vitaly[df_vitaly['Channel'] == 'inclusive']['σ, μb'],
+                      dy_exp_data_inclusive=df_vitaly[df_vitaly['Channel'] == 'inclusive']['Δσ, μb'],
+                      layout_title='Integrated Cross section (mcbn)', x_label=x_axis_name)
 
-                         x_exp_data_inclusive=df_vitaly[df_vitaly['Channel']=='inclusive']['Q2, GeV2'],
-                         y_exp_data_inclusive=df_vitaly[df_vitaly['Channel']=='inclusive']['σ, μb'],
-                         dy_exp_data_inclusive=df_vitaly[df_vitaly['Channel']=='inclusive']['Δσ, μb'],
-                         layout_title='Integral cross section (mcbn)', x_label=x_axis_name)
-    
 
 else:
-    fig=graph_maker(x_array=w_graph,
-                             y_array=sigma_integrated,
-                             d_y_array=d_sigma_integrated,
-                         x_exp_data=df_vitaly[df_vitaly['Channel']==set_channel_name]['W, GeV'],
-                         y_exp_data=df_vitaly[df_vitaly['Channel']==set_channel_name]['σ, μb'],
-                         dy_exp_data=df_vitaly[df_vitaly['Channel']==set_channel_name]['Δσ, μb'],
+    fig = graph_maker(x_array=w_graph,
+                      y_array=sigma_integrated,
+                      d_y_array=d_sigma_integrated,
+                      x_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['W, GeV'],
+                      y_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['σ, μb'],
+                      dy_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['Δσ, μb'],
 
-                         x_exp_data_inclusive=df_vitaly[df_vitaly['Channel']=='inclusive']['W, GeV'],
-                         y_exp_data_inclusive=df_vitaly[df_vitaly['Channel']=='inclusive']['σ, μb'],
-                         dy_exp_data_inclusive=df_vitaly[df_vitaly['Channel']=='inclusive']['Δσ, μb'],
-                         layout_title='Integral cross section (mcbn)', x_label=x_axis_name)
+                      x_exp_data_inclusive=df_vitaly[df_vitaly['Channel'] == 'inclusive']['W, GeV'],
+                      y_exp_data_inclusive=df_vitaly[df_vitaly['Channel'] == 'inclusive']['σ, μb'],
+                      dy_exp_data_inclusive=df_vitaly[df_vitaly['Channel'] == 'inclusive']['Δσ, μb'],
+                      layout_title='Integrated Cross section (mcbn)', x_label=x_axis_name)
 
-    
-    
-    
-if method==1:
-    min_val_second_interpolation=max(min(q_graph),
-        df_vitaly[df_vitaly['Channel']=='inclusive']['Q2, GeV2'].min(),
-        df_vitaly[df_vitaly['Channel']==set_channel_name]['Q2, GeV2'].min())
-    max_val_second_interpolation=min(max(q_graph),
-        df_vitaly[df_vitaly['Channel']=='inclusive']['Q2, GeV2'].max(),
-        df_vitaly[df_vitaly['Channel']==set_channel_name]['Q2, GeV2'].max())
+if method == 1:
+    min_val_second_interpolation = max(min(q_graph),
+                                       df_vitaly[df_vitaly['Channel'] == 'inclusive']['Q2, GeV2'].min(),
+                                       df_vitaly[df_vitaly['Channel'] == set_channel_name]['Q2, GeV2'].min())
+    max_val_second_interpolation = min(max(q_graph),
+                                       df_vitaly[df_vitaly['Channel'] == 'inclusive']['Q2, GeV2'].max(),
+                                       df_vitaly[df_vitaly['Channel'] == set_channel_name]['Q2, GeV2'].max())
 
+if method == 2:
+    min_val_second_interpolation = max(min(w_graph),
+                                       df_vitaly[df_vitaly['Channel'] == 'inclusive']['W, GeV'].min(),
+                                       df_vitaly[df_vitaly['Channel'] == set_channel_name]['W, GeV'].min())
+    max_val_second_interpolation = min(max(w_graph),
+                                       df_vitaly[df_vitaly['Channel'] == 'inclusive']['W, GeV'].max(),
+                                       df_vitaly[df_vitaly['Channel'] == set_channel_name]['W, GeV'].max())
 
-if method==2:
-    min_val_second_interpolation=max(min(w_graph),
-        df_vitaly[df_vitaly['Channel']=='inclusive']['W, GeV'].min(),
-        df_vitaly[df_vitaly['Channel']==set_channel_name]['W, GeV'].min())
-    max_val_second_interpolation=min(max(w_graph),
-        df_vitaly[df_vitaly['Channel']=='inclusive']['W, GeV'].max(),
-        df_vitaly[df_vitaly['Channel']==set_channel_name]['W, GeV'].max())
+common_x_axis = np.arange(round(min_val_second_interpolation, 2),
+                          round(max_val_second_interpolation, 2),
+                          0.001)
 
+df_vitaly_inclusive = df_vitaly[df_vitaly['Channel'] == 'inclusive'].copy()
+df_vitaly_exclusive = df_vitaly[df_vitaly['Channel'] == set_channel_name].copy()
+vitaly_values_exclusive = (df_vitaly_exclusive['σ, μb'].ravel().flatten(),
+                           df_vitaly_exclusive['Δσ, μb'].ravel().flatten())
+vitaly_values_inclusive = (df_vitaly_inclusive['σ, μb'].ravel().flatten(),
+                           df_vitaly_inclusive['Δσ, μb'].ravel().flatten())
+almaz_values = (sigma_integrated,
+                d_sigma_integrated)
 
-common_x_axis=np.arange(round(min_val_second_interpolation,2), 
-                        round(max_val_second_interpolation,2),
-                        0.001)
+almaz_values = np.stack((almaz_values), axis=-1)
+vitaly_values_exclusive = np.stack((vitaly_values_exclusive), axis=-1)
+vitaly_values_inclusive = np.stack((vitaly_values_inclusive), axis=-1)
 
-if method==1:
-    sigma_integrated_grid = griddata(np.array(q_graph), 
-                                      np.array(sigma_integrated),
-                                      np.array(common_x_axis),
-                                      method='linear', rescale=True)
-    
-    sigma_integrated_grid_vitaly = griddata(
-                                      np.array(df_vitaly[df_vitaly['Channel']==set_channel_name]['Q2, GeV2']),
-                                      np.array(df_vitaly[df_vitaly['Channel']==set_channel_name]['σ, μb']),
-                                      np.array(common_x_axis),
-                                      method='linear', rescale=True)
+if method == 1:
+    almaz_interpolation = griddata(np.array(q_graph),
+                                   almaz_values,
+                                   np.array(common_x_axis),
+                                   method='linear', rescale=True)
 
-    sigma_integrated_grid_inclusive = griddata(
-                                      np.array(df_vitaly[df_vitaly['Channel']=='inclusive']['Q2, GeV2']),
-                                      np.array(df_vitaly[df_vitaly['Channel']=='inclusive']['σ, μb']),
-                                      np.array(common_x_axis),
-                                      method='linear', rescale=True)
-    
-    
-if method==2:
-    sigma_integrated_grid = griddata(np.array(w_graph), 
-                                      np.array(sigma_integrated),
-                                      np.array(common_x_axis),
-                                      method='linear', rescale=True)
-    
-    sigma_integrated_grid_vitaly = griddata(
-                                      np.array(df_vitaly[df_vitaly['Channel']==set_channel_name]['W, GeV']),
-                                      np.array(df_vitaly[df_vitaly['Channel']==set_channel_name]['σ, μb']),
-                                      np.array(common_x_axis),
-                                      method='linear', rescale=True)
+    vitaly_exclusive = griddata(
+        np.array(df_vitaly_exclusive['Q2, GeV2']),
+        vitaly_values_exclusive,
+        np.array(common_x_axis),
+        method='linear', rescale=True)
 
-    sigma_integrated_grid_inclusive = griddata(
-                                      np.array(df_vitaly[df_vitaly['Channel']=='inclusive']['W, GeV']),
-                                      np.array(df_vitaly[df_vitaly['Channel']=='inclusive']['σ, μb']),
-                                      np.array(common_x_axis),
-                                      method='linear', rescale=True)
+    vitaly_inclusive = griddata(
+        np.array(df_vitaly_inclusive['Q2, GeV2']),
+        vitaly_values_inclusive,
+        np.array(common_x_axis),
+        method='linear', rescale=True)
 
-    
-result_df=pd.DataFrame({'x_axis_values':common_x_axis,
-              'sigma_integrated_grid' : sigma_integrated_grid,
-              'sigma_integrated_grid_vitaly' : sigma_integrated_grid_vitaly,
-              'sigma_integrated_grid_inclusive' : sigma_integrated_grid_inclusive })
+if method == 2:
+    almaz_interpolation = griddata(np.array(w_graph),
+                                   almaz_values,
+                                   np.array(common_x_axis),
+                                   method='linear', rescale=True)
+
+    vitaly_exclusive = griddata(
+        np.array(df_vitaly_exclusive['W, GeV']),
+        vitaly_values_exclusive,
+        np.array(common_x_axis),
+        method='linear', rescale=True)
+
+    vitaly_inclusive = griddata(
+        np.array(df_vitaly_inclusive['W, GeV']),
+        vitaly_values_inclusive,
+        np.array(common_x_axis),
+        method='linear', rescale=True)
+
+sigma_integrated_grid, d_sigma_integrated_grid = almaz_interpolation[:, 0], almaz_interpolation[:, 1]
+sigma_integrated_grid_vitaly, d_sigma_integrated_grid_vitaly = vitaly_exclusive[:, 0], vitaly_exclusive[:, 1]
+sigma_integrated_grid_inclusive, d_sigma_integrated_grid_inclusive = vitaly_inclusive[:, 0], vitaly_inclusive[:, 1]
+
+result_df = pd.DataFrame({'x_axis_values': common_x_axis,
+                          'sigma_integrated_grid': sigma_integrated_grid,
+                          'd_sigma_integrated_grid': d_sigma_integrated_grid,
+                          'sigma_integrated_grid_vitaly': sigma_integrated_grid_vitaly,
+                          'd_sigma_integrated_grid_vitaly': d_sigma_integrated_grid_vitaly,
+                          'sigma_integrated_grid_inclusive': sigma_integrated_grid_inclusive,
+                          'd_sigma_integrated_grid_inclusive': d_sigma_integrated_grid_inclusive
+                          })
 
 result_df.dropna(inplace=True)
 result_df.reset_index(inplace=True, drop=True)
 
-result_df['frac_sigma']=result_df['sigma_integrated_grid']/result_df['sigma_integrated_grid_inclusive']
-result_df['frac_sigma_vitaly']=result_df['sigma_integrated_grid_vitaly']/result_df['sigma_integrated_grid_inclusive']
+result_df['frac_sigma'] = result_df['sigma_integrated_grid'] / result_df['sigma_integrated_grid_inclusive']
+result_df['frac_sigma_vitaly'] = result_df['sigma_integrated_grid_vitaly'] / result_df[
+    'sigma_integrated_grid_inclusive']
+
+_a, _b, _c = result_df['sigma_integrated_grid'], result_df['sigma_integrated_grid'], result_df[
+    'sigma_integrated_grid_inclusive']
+_d_a, _d_b, _d_c = result_df['d_sigma_integrated_grid'], result_df['d_sigma_integrated_grid'], result_df[
+    'd_sigma_integrated_grid_inclusive']
+
+result_df['d_frac_sigma'] = (((_d_a / _c) ** 2) + (((_a * _d_c) / _c ** 2) ** 2)) ** 0.5
+result_df['d_frac_sigma_vitaly'] = (((_d_b / _c) ** 2) + (((_b * _d_c) / _c ** 2) ** 2)) ** 0.5
 
 fig_part = make_part_graph(x_array=result_df['x_axis_values'],
                            y_array=result_df['frac_sigma'],
-                           d_y_array=[],
+                           d_y_array=result_df['d_frac_sigma'],
                            y_exp_data=result_df['frac_sigma_vitaly'],
-                           dy_exp_data=[],
-                           layout_title='Part of the inclusive cross section',
+                           dy_exp_data=result_df['d_frac_sigma_vitaly'],
+                           layout_title='Part of the Inclusive Cross section',
                            x_label=x_axis_name)
+
+
+
 
 
 
@@ -744,18 +753,7 @@ print(""""
             </div>
            nasrtdinov.ag17@physics.msu.ru
         </div>
-    </form>""".format(w_start,w_finish,q_start,q_finish,energy,interpolation_step,particle_form_text))
-
-
-particle_class=gettext.getfirst("Particle", "Pin")
-w_start=float(gettext.getfirst("w_min", "0.1").replace(",", "."))
-w_finish=float(gettext.getfirst("w_max", "4.0").replace(",", "."))
-q_start=float(gettext.getfirst("q2_min", "0.5").replace(",", "."))
-q_finish=float(gettext.getfirst("q2_max", "0.5").replace(",", "."))
-energy=float(gettext.getfirst("energy", "5.75").replace(",", "."))
-interpolation_step=float(gettext.getfirst("step", "0.01"))
-
-
+    </form>""".format(w_start, w_finish, q_start, q_finish, energy, interpolation_step, particle_form_text))
 
 
 print("""
@@ -765,8 +763,8 @@ print("""
         particle:  {}    &nbsp;&nbsp;&nbsp;&nbsp;   beam_energy: {}   &nbsp;&nbsp;&nbsp;&nbsp; interpolation step : {}
         <br><br>
         w_min = {} &nbsp;&nbsp;&nbsp;   w_max={}  &nbsp;&nbsp;&nbsp;
-        q2_min={}   &nbsp;&nbsp;&nbsp;     q2_max={}""".format(particle_class,energy,interpolation_step,w_start,w_finish,q_start,q_finish))
-
+        q2_min={}   &nbsp;&nbsp;&nbsp;     q2_max={}""".format(particle_class, energy, interpolation_step, w_start,
+                                                               w_finish, q_start, q_finish))
 
 print("{}".format(fig.to_html(full_html=False)))
 print("<br><br><br><br>")
