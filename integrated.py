@@ -768,7 +768,8 @@ print("""
 
 print("<br>")
 print("<br>")
-print("""<a href="{}">Vitaly's interploation link</a>""".format(response.url))
+
+print("""<a href="{}">Vitaly's interploation link</a>""".format((response.url).replace('res-view=html', 'res-view=plot')))
 print("<br>")
 print("<br>")
 print("{}".format(fig.to_html(full_html=False)))
