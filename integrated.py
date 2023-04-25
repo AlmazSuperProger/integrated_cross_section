@@ -403,9 +403,9 @@ if method == 1:
     fig = graph_maker(x_array=q_graph,
                       y_array=sigma_integrated,
                       d_y_array=d_sigma_integrated,
-                      # x_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['Q2, GeV2'],
-                      # y_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['σ, μb'],
-                      # dy_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['Δσ, μb'],
+                      x_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['Q2, GeV2'],
+                      y_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['σ, μb'],
+                      dy_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['Δσ, μb'],
 
                       x_exp_data_inclusive=df_vitaly[df_vitaly['Channel'] == 'inclusive']['Q2, GeV2'],
                       y_exp_data_inclusive=df_vitaly[df_vitaly['Channel'] == 'inclusive']['σ, μb'],
@@ -417,9 +417,9 @@ else:
     fig = graph_maker(x_array=w_graph,
                       y_array=sigma_integrated,
                       d_y_array=d_sigma_integrated,
-                      # x_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['W, GeV'],
-                      # y_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['σ, μb'],
-                      # dy_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['Δσ, μb'],
+                      x_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['W, GeV'],
+                      y_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['σ, μb'],
+                      dy_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['Δσ, μb'],
 
                       x_exp_data_inclusive=df_vitaly[df_vitaly['Channel'] == 'inclusive']['W, GeV'],
                       y_exp_data_inclusive=df_vitaly[df_vitaly['Channel'] == 'inclusive']['σ, μb'],
@@ -526,8 +526,8 @@ result_df['d_frac_sigma_vitaly'] = (((_d_b / _c) ** 2) + (((_b * _d_c) / _c ** 2
 fig_part = make_part_graph(x_array=result_df['x_axis_values'],
                            y_array=result_df['frac_sigma'],
                            d_y_array=result_df['d_frac_sigma'],
-                           # y_exp_data=result_df['frac_sigma_vitaly'],
-                           # dy_exp_data=result_df['d_frac_sigma_vitaly'],
+                           y_exp_data=result_df['frac_sigma_vitaly'],
+                           dy_exp_data=result_df['d_frac_sigma_vitaly'],
                            layout_title='Part of the Inclusive Cross section',
                            x_label=x_axis_name)
 
@@ -766,6 +766,11 @@ print("""
         q2_min={}   &nbsp;&nbsp;&nbsp;     q2_max={}""".format(particle_class, energy, interpolation_step, w_start,
                                                                w_finish, q_start, q_finish))
 
+print("<br>")
+print("<br>")
+print("""<a href="{}">Vitaly's interploation link</a>""".format(response.url))
+print("<br>")
+print("<br>")
 print("{}".format(fig.to_html(full_html=False)))
 print("<br><br><br><br>")
 print("{}".format(fig_part.to_html(full_html=False)))
