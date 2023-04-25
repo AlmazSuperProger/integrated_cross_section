@@ -169,7 +169,11 @@ tmp_df.reset_index(drop=True, inplace=True)
 tmp_df['nu'] = (tmp_df['w'] ** 2 + tmp_df['q'] - mp * mp) / (2 * mp)
 tmp_df['eps'] = 1 / (1 + 2 * (tmp_df['nu'] ** 2 + tmp_df['q']) / (4 * (energy - tmp_df['nu']) * energy - tmp_df['q']))
 tmp_df['sigma_u'] = tmp_df['sigma_t'] + tmp_df['sigma_l'] * tmp_df['eps']
+tmp_df['d_sigma_u'] = ((tmp_df['d_sigma_t']**2) + ((tmp_df['d_sigma_l']*tmp_df['eps'])**2))
 tmp_df['sigma'] = tmp_df['sigma_u'] * 2 * np.pi
+tmp_df['d_sigma'] = tmp_df['d_sigma_u'] * 2 * np.pi
+tmp_df['sigma_upper']=tmp_df['sigma']+tmp_df['d_sigma']/2
+tmp_df['sigma_lower']=tmp_df['sigma']-tmp_df['d_sigma']/2
 
 # calculate integral cross section
 w_graph = []
@@ -185,15 +189,22 @@ if method == 2:
         t.reset_index(inplace=True, drop=True)
         integral_sigma = 0
         d_integral_sigma = 0
+        integral_sigma_upper=0
+        integral_sigma_lower=0
         for cos_idx in range(0, len(t) - 1):
             integral_sigma += (t.loc[cos_idx + 1, 'cos'] - t.loc[cos_idx, 'cos']) * \
                               ((t.loc[cos_idx + 1, 'sigma'] + t.loc[cos_idx, 'sigma']) / 2)
-            d_integral_sigma += (t.loc[cos_idx + 1, 'sigma'] ** 2 + t.loc[cos_idx, 'sigma'] ** 2) * \
-                                ((t.loc[cos_idx + 1, 'cos'] - t.loc[cos_idx, 'cos']) / 2) ** 2
+            integral_sigma_upper += (t.loc[cos_idx + 1, 'cos'] - t.loc[cos_idx, 'cos']) * \
+                              ((t.loc[cos_idx + 1, 'sigma_upper'] + t.loc[cos_idx, 'sigma_upper']) / 2)
+            integral_sigma_lower += (t.loc[cos_idx + 1, 'cos'] - t.loc[cos_idx, 'cos']) * \
+                              ((t.loc[cos_idx + 1, 'sigma_lower'] + t.loc[cos_idx, 'sigma_lower']) / 2)
+            # d_integral_sigma += (t.loc[cos_idx + 1, 'd_sigma'] ** 2 + t.loc[cos_idx, 'd_sigma'] ** 2) * \
+            #                     ((t.loc[cos_idx + 1, 'cos'] - t.loc[cos_idx, 'cos']) / 2) ** 2
         w_graph.append(el)
         q_graph.append(q_start)
         sigma_integrated.append(integral_sigma)
-        d_sigma_integrated.append(d_integral_sigma ** 0.5)
+        # d_sigma_integrated.append(d_integral_sigma ** 0.5)
+        d_sigma_integrated.append(integral_sigma_upper-integral_sigma_lower)
 
 if method == 1:
     abscissa = 'Q2'
@@ -202,15 +213,22 @@ if method == 1:
         t.reset_index(inplace=True, drop=True)
         integral_sigma = 0
         d_integral_sigma = 0
+        integral_sigma_upper=0
+        integral_sigma_lower=0
         for cos_idx in range(0, len(t) - 1):
             integral_sigma += (t.loc[cos_idx + 1, 'cos'] - t.loc[cos_idx, 'cos']) * \
                               ((t.loc[cos_idx + 1, 'sigma'] + t.loc[cos_idx, 'sigma']) / 2)
-            d_integral_sigma += (t.loc[cos_idx + 1, 'sigma'] ** 2 + t.loc[cos_idx, 'sigma'] ** 2) * \
-                                ((t.loc[cos_idx + 1, 'cos'] - t.loc[cos_idx, 'cos']) / 2) ** 2
+            integral_sigma_upper += (t.loc[cos_idx + 1, 'cos'] - t.loc[cos_idx, 'cos']) * \
+                              ((t.loc[cos_idx + 1, 'sigma_upper'] + t.loc[cos_idx, 'sigma_upper']) / 2)
+            integral_sigma_lower += (t.loc[cos_idx + 1, 'cos'] - t.loc[cos_idx, 'cos']) * \
+                              ((t.loc[cos_idx + 1, 'sigma_lower'] + t.loc[cos_idx, 'sigma_lower']) / 2)
+            # d_integral_sigma += (t.loc[cos_idx + 1, 'd_sigma'] ** 2 + t.loc[cos_idx, 'd_sigma'] ** 2) * \
+            #                     ((t.loc[cos_idx + 1, 'cos'] - t.loc[cos_idx, 'cos']) / 2) ** 2
         w_graph.append(w_start)
         q_graph.append(el)
         sigma_integrated.append(integral_sigma)
-        d_sigma_integrated.append(d_integral_sigma ** 0.5)
+        # d_sigma_integrated.append(d_integral_sigma ** 0.5)
+        d_sigma_integrated.append(integral_sigma_upper - integral_sigma_lower)
 
 set_channel = [255, 1] if particle_class == 'Pin' else [255, 2]
 set_channel_name = 'π+n' if particle_class == 'Pin' else 'π0p'
@@ -403,6 +421,7 @@ if method == 1:
     fig = graph_maker(x_array=q_graph,
                       y_array=sigma_integrated,
                       d_y_array=d_sigma_integrated,
+
                       x_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['Q2, GeV2'],
                       y_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['σ, μb'],
                       dy_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['Δσ, μb'],
@@ -417,6 +436,7 @@ else:
     fig = graph_maker(x_array=w_graph,
                       y_array=sigma_integrated,
                       d_y_array=d_sigma_integrated,
+
                       x_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['W, GeV'],
                       y_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['σ, μb'],
                       dy_exp_data=df_vitaly[df_vitaly['Channel'] == set_channel_name]['Δσ, μb'],
@@ -515,9 +535,9 @@ result_df['frac_sigma'] = result_df['sigma_integrated_grid'] / result_df['sigma_
 result_df['frac_sigma_vitaly'] = result_df['sigma_integrated_grid_vitaly'] / result_df[
     'sigma_integrated_grid_inclusive']
 
-_a, _b, _c = result_df['sigma_integrated_grid'], result_df['sigma_integrated_grid'], result_df[
+_a, _b, _c = result_df['sigma_integrated_grid'], result_df['sigma_integrated_grid_vitaly'], result_df[
     'sigma_integrated_grid_inclusive']
-_d_a, _d_b, _d_c = result_df['d_sigma_integrated_grid'], result_df['d_sigma_integrated_grid'], result_df[
+_d_a, _d_b, _d_c = result_df['d_sigma_integrated_grid'], result_df['d_sigma_integrated_grid_vitaly'], result_df[
     'd_sigma_integrated_grid_inclusive']
 
 result_df['d_frac_sigma'] = (((_d_a / _c) ** 2) + (((_a * _d_c) / _c ** 2) ** 2)) ** 0.5
